@@ -129,15 +129,15 @@ const FilterBar: React.FC<FilterBarProps> = ({
               </label>
               <Select
                 onValueChange={(value) => 
-                  handleFilterChange('membershipName', value ? [value] : [])
+                  handleFilterChange('membershipName', value === "all" ? [] : [value])
                 }
-                value={filters.membershipName?.[0] || ""}
+                value={filters.membershipName?.[0] || "all"}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Any membership" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any membership</SelectItem>
+                  <SelectItem value="all">Any membership</SelectItem>
                   {(availableMemberships || membershipOptions).map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
@@ -154,15 +154,15 @@ const FilterBar: React.FC<FilterBarProps> = ({
               </label>
               <Select
                 onValueChange={(value) => 
-                  handleFilterChange('homeLocation', value ? [value] : [])
+                  handleFilterChange('homeLocation', value === "all" ? [] : [value])
                 }
-                value={filters.homeLocation?.[0] || ""}
+                value={filters.homeLocation?.[0] || "all"}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Any location" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any location</SelectItem>
+                  <SelectItem value="all">Any location</SelectItem>
                   {(availableLocations || locationOptions).map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
@@ -179,15 +179,15 @@ const FilterBar: React.FC<FilterBarProps> = ({
               </label>
               <Select
                 onValueChange={(value) => 
-                  handleFilterChange('tags', value ? [value] : [])
+                  handleFilterChange('tags', value === "all" ? [] : [value])
                 }
-                value={filters.tags?.[0] || ""}
+                value={filters.tags?.[0] || "all"}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Any tag" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any tag</SelectItem>
+                  <SelectItem value="all">Any tag</SelectItem>
                   {(availableTags || tagOptions).map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
@@ -204,15 +204,15 @@ const FilterBar: React.FC<FilterBarProps> = ({
               </label>
               <Select
                 onValueChange={(value) => 
-                  handleFilterChange('assignedTo', value || undefined)
+                  handleFilterChange('assignedTo', value === "all" ? undefined : value)
                 }
-                value={filters.assignedTo || ""}
+                value={filters.assignedTo || "all"}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Any assignee" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any assignee</SelectItem>
+                  <SelectItem value="all">Any assignee</SelectItem>
                   {assigneeOptions.map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
