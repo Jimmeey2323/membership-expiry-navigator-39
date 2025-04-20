@@ -1,4 +1,3 @@
-
 import Papa from 'papaparse';
 import { FileInfo, FileType, MembershipRecord, ProcessedData } from '@/types';
 
@@ -32,6 +31,55 @@ export const parseCSVFile = (file: File): Promise<any[]> => {
   });
 };
 
+// Generate tags based on membership record data
+const generateTags = (record: MembershipRecord): string[] => {
+  const tags: string[] = [];
+  
+  // Add tags based on membership name
+  if (record.membershipName.toLowerCase().includes('annual')) {
+    tags.push('annual');
+  } else if (record.membershipName.toLowerCase().includes('monthly')) {
+    tags.push('monthly');
+  }
+  
+  // Add tags based on days lapsed
+  if (record.daysLapsed !== undefined) {
+    if (record.daysLapsed < 0) {
+      tags.push('upcoming');
+    } else if (record.daysLapsed === 0) {
+      tags.push('today');
+    } else if (record.daysLapsed <= 7) {
+      tags.push('recent');
+    } else if (record.daysLapsed <= 30) {
+      tags.push('30-days');
+    } else if (record.daysLapsed <= 90) {
+      tags.push('90-days');
+    } else {
+      tags.push('old');
+    }
+  }
+  
+  // Add location-based tag
+  if (record.homeLocation) {
+    tags.push(`location:${record.homeLocation.toLowerCase().replace(/\s+/g, '-')}`);
+  }
+  
+  return tags;
+};
+
+// Calculate days lapsed since expiration
+const calculateDaysLapsed = (expiryDate: string): number => {
+  const expiry = new Date(expiryDate);
+  const today = new Date();
+  
+  // Reset time portion for accurate day calculation
+  expiry.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  
+  const differenceInTime = today.getTime() - expiry.getTime();
+  return Math.floor(differenceInTime / (1000 * 3600 * 24));
+};
+
 // Function to standardize field names from different CSV formats
 const standardizeRecords = (data: any[], fileType: FileType): MembershipRecord[] => {
   return data.map(record => {
@@ -58,6 +106,11 @@ const standardizeRecords = (data: any[], fileType: FileType): MembershipRecord[]
     // Add file type specific fields
     if (fileType === 'expirations') {
       standardRecord.expiresAt = record['Expires at'];
+      
+      // Calculate days lapsed if expiration date is available
+      if (standardRecord.expiresAt) {
+        standardRecord.daysLapsed = calculateDaysLapsed(standardRecord.expiresAt);
+      }
     } else if (fileType === 'frozen') {
       standardRecord.frozenAt = record['Frozen at'];
       standardRecord.unfrozenAt = record['Unfrozen at'];
@@ -122,8 +175,12 @@ export const processFiles = (files: FileInfo[]): ProcessedData => {
     }
   });
 
-  // Convert the filtered map back to an array
-  const processedRecords = Object.values(emailToLatestRecord);
+  // Convert the filtered map back to an array and add tags
+  const processedRecords = Object.values(emailToLatestRecord).map(record => {
+    // Add tags to each record
+    const updatedRecord = { ...record, tags: generateTags(record) };
+    return updatedRecord;
+  });
 
   // Group data in different ways for display
   const byMembershipName: Record<string, MembershipRecord[]> = {};

@@ -17,6 +17,17 @@ export interface MembershipRecord {
   unfrozenAt?: string;
   boughtAt?: string;
   homeLocation: string;
+  tags?: string[];
+  daysLapsed?: number;
+  assignedTo?: string;
+  followUps?: FollowUp[];
+}
+
+export interface FollowUp {
+  id: string;
+  date: string;
+  comment: string;
+  createdAt: string;
 }
 
 export interface ProcessedData {
@@ -28,3 +39,21 @@ export interface ProcessedData {
 }
 
 export type ViewType = 'kanban' | 'card' | 'table' | 'timeline' | 'custom';
+
+export type PeriodGrouping = 'month' | 'quarter' | 'year' | 'week';
+
+export type SortDirection = 'asc' | 'desc';
+
+export type SortField = 'customerName' | 'expiresAt' | 'membershipName' | 'homeLocation' | 'daysLapsed' | 'tags';
+
+export interface FilterOptions {
+  membershipName?: string[];
+  homeLocation?: string[];
+  tags?: string[];
+  expiresAfter?: string;
+  expiresBefore?: string;
+  assignedTo?: string;
+  search?: string;
+}
+
+export type ExportFormat = 'csv' | 'excel' | 'pdf' | 'json';

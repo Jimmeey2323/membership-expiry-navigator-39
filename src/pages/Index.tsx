@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { FileInfo, ProcessedData } from '@/types';
+import { FileInfo, MembershipRecord, ProcessedData } from '@/types';
 import { processFiles } from '@/utils/csvParser';
 import FileUpload from '@/components/FileUpload';
 import DataVisualization from '@/components/DataVisualization';
@@ -43,12 +43,29 @@ const Index = () => {
     setFiles([]);
     setProcessedData(null);
   };
+  
+  const handleDataUpdate = (updatedRecords: MembershipRecord[]) => {
+    if (!processedData) return;
+    
+    // Create updated processed data with the new records
+    const updatedData = processFiles([
+      ...files.filter(file => file.type !== 'expirations'),
+      {
+        ...files.find(file => file.type === 'expirations')!,
+        data: updatedRecords
+      }
+    ]);
+    
+    setProcessedData(updatedData);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm py-6 px-4 md:px-6">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 animate-fade-in">
+      <header className="bg-white shadow-sm py-6 px-4 md:px-6 border-b border-border/40">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl md:text-3xl font-bold text-primary">Membership Expiry Navigator</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-primary bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            Membership Expiry Navigator
+          </h1>
           <p className="text-muted-foreground mt-1">
             Upload and analyze membership expiration data
           </p>
@@ -85,14 +102,22 @@ const Index = () => {
                 Upload New Files
               </button>
             </div>
-            <DataVisualization data={processedData} />
+            <DataVisualization 
+              data={processedData} 
+              onDataUpdate={handleDataUpdate} 
+            />
           </div>
         )}
       </main>
 
       <footer className="bg-white border-t py-6 px-4 md:px-6 mt-12">
-        <div className="max-w-7xl mx-auto text-center text-sm text-muted-foreground">
-          Membership Expiry Navigator &copy; {new Date().getFullYear()}
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
+          <div className="text-center md:text-left text-sm text-muted-foreground">
+            Membership Expiry Navigator &copy; {new Date().getFullYear()}
+          </div>
+          <div className="text-xs text-muted-foreground mt-2 md:mt-0">
+            Track and manage membership expirations efficiently
+          </div>
         </div>
       </footer>
     </div>
