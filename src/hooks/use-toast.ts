@@ -1,3 +1,5 @@
+
+// src/hooks/use-toast.ts
 import * as React from "react"
 
 import type {
@@ -6,7 +8,7 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_REMOVE_DELAY = 5000 // Lowered from 1000000 to a more reasonable value
 
 type ToasterToast = ToastProps & {
   id: string
