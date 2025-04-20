@@ -1,3 +1,4 @@
+
 import Papa from 'papaparse';
 import { FileInfo, FileType, MembershipRecord, ProcessedData } from '@/types';
 
@@ -34,9 +35,22 @@ export const parseCSVFile = (file: File): Promise<any[]> => {
 // Function to standardize field names from different CSV formats
 const standardizeRecords = (data: any[], fileType: FileType): MembershipRecord[] => {
   return data.map(record => {
+    let customerName, customerEmail;
+
+    if (fileType === 'expirations') {
+      // For expirations file, get values by column index instead of header name
+      const values = Object.values(record);
+      customerName = values[0]; // First column is customer name
+      customerEmail = values[1]; // Second column is customer email
+    } else {
+      // For other files, use header names
+      customerName = record['Customer name'];
+      customerEmail = record['Customer email'];
+    }
+
     const standardRecord: MembershipRecord = {
-      customerName: record['Customer name'],
-      customerEmail: record['Customer email'],
+      customerName,
+      customerEmail,
       membershipName: record['Membership name'],
       homeLocation: record['Home location'] || 'N/A',
     };
