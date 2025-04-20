@@ -31,6 +31,44 @@ export const parseCSVFile = (file: File): Promise<any[]> => {
   });
 };
 
+// Clean membership name using patterns
+const getCleanedMembershipName = (membershipName: string): string => {
+  if (!membershipName) return "Others";
+  
+  const item = String(membershipName).trim();
+  const patterns = [
+    { pattern: /\b(Amped Up!?|Amped\s*Up)\b/i, result: "Session" },
+    { pattern: /\b(powerCycle|PowerCycle(\s+Express)?)\b/i, result: "Session" },
+    { pattern: /\bStudio\s+(Back Body Blaze|Barre 57|Cardio Barre|FIT|Foundations|HIIT|Mat(\s+57)?|Recovery|SWEAT|Trainer's Choice)\b/i, result: "Session" },
+    { pattern: /\bVirtual\s+(Barre 57|Single Class)\b/i, result: "Session" },
+    { pattern: /\bStudio\s+Single\s+[Cc]lass\.?\b/i, result: "Studio Single Class" },
+    { pattern: /\b(\d+)\s*(Month|Week)\s+[Uu]nlimited\b/i, result: (match: string[], num: string, period: string) => `Studio ${num} ${period} Unlimited` },
+    { pattern: /\bStudio\s+(\d+)\s+Single\s+Class\s+Pack\b/i, result: (match: string[], num: string) => `Studio ${num} Single Class Package` },
+    { pattern: /\bStudio\s+(\d+)\s+Class\s+Package\b/i, result: (match: string[], num: string) => `Studio ${num} Class Package` },
+    { pattern: /\bStudio\s+Private\s+Class\b/i, result: "Studio Private Class" },
+    { pattern: /\bStudio\s+Private\s+Class\s+X\s+(\d+)\b/i, result: (match: string[], num: string) => `Studio Private Class X ${num}` },
+    { pattern: /\bStudio\s+Annual\s+Membership\s+-\s+Monthly\s+Installment\b/i, result: "Studio Annual Unlimited - Installment" },
+    { pattern: /\bStudio\s+Annual\s+Unlimited\s+Membership\b/i, result: "Studio Annual Unlimited" },
+    { pattern: /\bThe\s+BURN\s+Package\b/i, result: "The Burn Package" },
+    { pattern: /\bTEST\b/i, result: "Test" },
+    { pattern: /\bTest\b/i, result: "Test" },
+    { pattern: /\bNewcomers\s+2\s+For\s+1\b/i, result: "Studio Newcomers 2 For 1" },
+    { pattern: /\bStudio\s+Extended\s+(\d+)\s+Single\s+Class\s+Pack\b/i, result: (match: string[], num: string) => `Studio ${num} Single Class Package` },
+    { pattern: /\b(\w+)\b/i, result: (match: string[]) => /^[A-Z0-9]+$/.test(match[0]) ? "Other - Gift Card" : "Others" },
+    { pattern: /\b(money-credit)\b/i, result: "Other - Money Credits" },
+    { pattern: /\bStudio\s+Happy\s+Hour\s+Private\b/i, result: "Studio Happy Hour Private" }
+  ];
+
+  for (const { pattern, result } of patterns) {
+    const match = item.match(pattern);
+    if (match) {
+      return typeof result === 'function' ? result(match) : result;
+    }
+  }
+
+  return "Others";
+};
+
 // Generate tags based on membership record data
 const generateTags = (record: MembershipRecord): string[] => {
   const tags: string[] = [];
@@ -96,10 +134,14 @@ const standardizeRecords = (data: any[], fileType: FileType): MembershipRecord[]
       customerEmail = record['Customer email'];
     }
 
+    // Clean the membership name
+    const rawMembershipName = record['Membership name'];
+    const cleanedMembershipName = getCleanedMembershipName(rawMembershipName);
+
     const standardRecord: MembershipRecord = {
       customerName,
       customerEmail,
-      membershipName: record['Membership name'],
+      membershipName: cleanedMembershipName,
       homeLocation: record['Home location'] || 'N/A',
     };
 
