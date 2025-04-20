@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,11 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				membership: {
+					expiration: '#3b82f6',
+					frozen: '#8b5cf6',
+					notactivated: '#ec4899'
 				}
 			},
 			borderRadius: {
@@ -70,25 +76,39 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
+				},
+				'float-in': {
+					'0%': { transform: 'translateY(20px)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
+				},
+				'spin-slow': {
+					'0%': { transform: 'rotate(0deg)' },
+					'100%': { transform: 'rotate(360deg)' }
+				},
+				'letter-move': {
+					'0%': { transform: 'translate(var(--x-start), var(--y-start)) rotate(0deg)', opacity: '0' },
+					'50%': { opacity: '1' },
+					'100%': { transform: 'translate(0, 0) rotate(var(--rotation))', opacity: '0' }
+				},
+				'number-float': {
+					'0%': { transform: 'translate(var(--x-start), var(--y-start)) scale(0.3)', opacity: '0' },
+					'50%': { opacity: '1' },
+					'100%': { transform: 'translate(var(--x-end), var(--y-end)) scale(1.2)', opacity: '0' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'float-in': 'float-in 0.5s ease-out forwards',
+				'spin-slow': 'spin-slow 3s linear infinite',
+				'letter-move': 'letter-move 1.5s ease-in-out forwards',
+				'number-float': 'number-float 2s ease-in-out forwards'
 			}
 		}
 	},
