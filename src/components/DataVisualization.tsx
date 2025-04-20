@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { 
   FilterOptions, 
@@ -16,7 +15,7 @@ import TableView from './views/TableView';
 import TimelineView from './views/TimelineView';
 import CustomView from './views/CustomView';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import FilterBar from './FilterBar';
 import MembershipModal from './MembershipModal';
 import ExportOptions from './ExportOptions';
@@ -36,7 +35,6 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onDataUpdat
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({});
   const [selectedRecord, setSelectedRecord] = useState<MembershipRecord | null>(null);
   
-  // Extract unique values for filtering
   const availableTags = useMemo(() => {
     const tags = new Set<string>();
     data.allRecords.forEach(record => {
@@ -53,34 +51,44 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onDataUpdat
     return Array.from(new Set(data.allRecords.map(record => record.homeLocation)));
   }, [data.allRecords]);
   
-  // Filter and sort records
+  const assigneeOptions = [
+    "Admin Admin",
+    "Akshay Rane",
+    "Api Serou",
+    "Imran Shaikh",
+    "Jayanta Banerjee",
+    "Manisha Rathod",
+    "Prathap Kp",
+    "Priyanka Abnave",
+    "Santhosh Kumar",
+    "Sheetal Kataria",
+    "Shipra Bhika",
+    "Tahira Sayyed",
+    "Zahur Shaikh"
+  ];
+  
   const filteredRecords = useMemo(() => {
     return data.allRecords.filter(record => {
-      // Filter by search term
       if (filterOptions.search && !record.customerName.toLowerCase().includes(filterOptions.search.toLowerCase()) && 
           !record.customerEmail.toLowerCase().includes(filterOptions.search.toLowerCase())) {
         return false;
       }
       
-      // Filter by membership name
       if (filterOptions.membershipName && filterOptions.membershipName.length > 0 && 
           !filterOptions.membershipName.includes(record.membershipName)) {
         return false;
       }
       
-      // Filter by home location
       if (filterOptions.homeLocation && filterOptions.homeLocation.length > 0 && 
           !filterOptions.homeLocation.includes(record.homeLocation)) {
         return false;
       }
       
-      // Filter by tags
       if (filterOptions.tags && filterOptions.tags.length > 0 && 
           !filterOptions.tags.some(tag => record.tags?.includes(tag))) {
         return false;
       }
       
-      // Filter by date range
       if (filterOptions.expiresAfter && record.expiresAt && 
           new Date(record.expiresAt) < new Date(filterOptions.expiresAfter)) {
         return false;
@@ -91,14 +99,12 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onDataUpdat
         return false;
       }
       
-      // Filter by assignee
       if (filterOptions.assignedTo && record.assignedTo !== filterOptions.assignedTo) {
         return false;
       }
       
       return true;
     }).sort((a, b) => {
-      // Sort by chosen field
       switch (sortField) {
         case 'customerName':
           return sortDirection === 'asc' 
@@ -133,33 +139,32 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onDataUpdat
     });
   }, [data.allRecords, filterOptions, sortField, sortDirection]);
   
-  // Group filtered records by various criteria for views
   const groupedData = useMemo(() => {
     const byMembershipName: Record<string, MembershipRecord[]> = {};
     const byHomeLocation: Record<string, MembershipRecord[]> = {};
     let byPeriod: Record<string, MembershipRecord[]> = {};
+    let byMonth: Record<string, MembershipRecord[]> = {};
     
-    // Group by membership name
     filteredRecords.forEach(record => {
-      // By membership name
       if (!byMembershipName[record.membershipName]) {
         byMembershipName[record.membershipName] = [];
       }
       byMembershipName[record.membershipName].push(record);
       
-      // By home location
       if (!byHomeLocation[record.homeLocation]) {
         byHomeLocation[record.homeLocation] = [];
       }
       byHomeLocation[record.homeLocation].push(record);
     });
     
-    // Group by period according to selected grouping
     byPeriod = groupByPeriod(filteredRecords, periodGrouping);
+    
+    byMonth = groupByPeriod(filteredRecords, 'month');
     
     return {
       byMembershipName,
       byPeriod,
+      byMonth,
       byHomeLocation,
       allRecords: filteredRecords
     };
@@ -174,6 +179,10 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onDataUpdat
       record.customerEmail === updatedRecord.customerEmail ? updatedRecord : record
     );
     onDataUpdate(updatedRecords);
+  };
+
+  const handleFilterChange = (filters: FilterOptions) => {
+    setFilterOptions(filters);
   };
 
   return (
@@ -203,8 +212,11 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onDataUpdat
       </div>
       
       <FilterBar
-        filterOptions={filterOptions}
-        setFilterOptions={setFilterOptions}
+        membershipOptions={availableMemberships}
+        locationOptions={availableLocations}
+        tagOptions={availableTags}
+        assigneeOptions={assigneeOptions}
+        onFilterChange={handleFilterChange}
         sortField={sortField}
         setSortField={setSortField}
         sortDirection={sortDirection}
@@ -267,7 +279,6 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onDataUpdat
         )}
       </div>
 
-      {/* Modal for viewing and editing records */}
       <MembershipModal
         record={selectedRecord}
         isOpen={!!selectedRecord}

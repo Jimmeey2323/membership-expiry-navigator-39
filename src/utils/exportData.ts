@@ -3,6 +3,7 @@ import { MembershipRecord, ExportFormat } from '@/types';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
+// This import is for the typings, the actual import is done as a plugin via CDN
 import 'jspdf-autotable';
 
 // Type augmentation for jsPDF to include autoTable

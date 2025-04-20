@@ -18,7 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Search, Calendar as CalendarIcon, X, Filter } from 'lucide-react';
 import { formatDate } from '@/utils/dateUtils';
-import { FilterOptions } from '@/types';
+import { FilterOptions, PeriodGrouping, SortDirection, SortField } from '@/types';
 
 interface FilterBarProps {
   membershipOptions: string[];
@@ -26,6 +26,16 @@ interface FilterBarProps {
   tagOptions: string[];
   assigneeOptions: string[];
   onFilterChange: (filters: FilterOptions) => void;
+  sortField?: SortField;
+  setSortField?: (field: SortField) => void;
+  sortDirection?: SortDirection;
+  setSortDirection?: (direction: SortDirection) => void;
+  periodGrouping?: PeriodGrouping;
+  setPeriodGrouping?: (period: PeriodGrouping) => void;
+  availableTags?: string[];
+  availableMemberships?: string[];
+  availableLocations?: string[];
+  showPeriodSelector?: boolean;
 }
 
 const FilterBar: React.FC<FilterBarProps> = ({
@@ -34,6 +44,16 @@ const FilterBar: React.FC<FilterBarProps> = ({
   tagOptions,
   assigneeOptions,
   onFilterChange,
+  sortField,
+  setSortField,
+  sortDirection,
+  setSortDirection,
+  periodGrouping,
+  setPeriodGrouping,
+  availableTags,
+  availableMemberships,
+  availableLocations,
+  showPeriodSelector,
 }) => {
   const [filters, setFilters] = useState<FilterOptions>({});
   const [isOpen, setIsOpen] = useState(false);
@@ -118,7 +138,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Any membership</SelectItem>
-                  {membershipOptions.map((option) => (
+                  {(availableMemberships || membershipOptions).map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
                     </SelectItem>
@@ -143,7 +163,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Any location</SelectItem>
-                  {locationOptions.map((option) => (
+                  {(availableLocations || locationOptions).map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
                     </SelectItem>
@@ -168,7 +188,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Any tag</SelectItem>
-                  {tagOptions.map((option) => (
+                  {(availableTags || tagOptions).map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
                     </SelectItem>
@@ -267,6 +287,80 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 </PopoverContent>
               </Popover>
             </div>
+
+            {/* Period Grouping Selector (conditionally rendered) */}
+            {showPeriodSelector && setPeriodGrouping && (
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Group by Period
+                </label>
+                <Select
+                  value={periodGrouping}
+                  onValueChange={(value) => 
+                    setPeriodGrouping(value as PeriodGrouping)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="week">Week</SelectItem>
+                    <SelectItem value="month">Month</SelectItem>
+                    <SelectItem value="quarter">Quarter</SelectItem>
+                    <SelectItem value="year">Year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
+            {/* Sort Field Selector */}
+            {setSortField && sortField && (
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Sort By
+                </label>
+                <Select
+                  value={sortField}
+                  onValueChange={(value) => 
+                    setSortField(value as SortField)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="customerName">Customer Name</SelectItem>
+                    <SelectItem value="expiresAt">Expiration Date</SelectItem>
+                    <SelectItem value="membershipName">Membership Type</SelectItem>
+                    <SelectItem value="homeLocation">Location</SelectItem>
+                    <SelectItem value="daysLapsed">Days Lapsed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
+            {/* Sort Direction */}
+            {setSortDirection && sortDirection && (
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Sort Direction
+                </label>
+                <Select
+                  value={sortDirection}
+                  onValueChange={(value) => 
+                    setSortDirection(value as SortDirection)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="asc">Ascending</SelectItem>
+                    <SelectItem value="desc">Descending</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           
           <div className="flex justify-between pt-4 border-t">
