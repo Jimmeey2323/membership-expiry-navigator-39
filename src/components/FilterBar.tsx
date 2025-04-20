@@ -1,334 +1,282 @@
 
 import React, { useState } from 'react';
-import { FilterOptions, SortDirection, SortField, PeriodGrouping } from '@/types';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { CalendarIcon, Filter, SearchIcon, SlidersHorizontal, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select';
+} from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from './ui/popover';
-import { Calendar } from './ui/calendar';
-import { format } from 'date-fns';
-import { Checkbox } from './ui/checkbox';
+} from '@/components/ui/popover';
+import { Badge } from '@/components/ui/badge';
+import { Search, Calendar as CalendarIcon, X, Filter } from 'lucide-react';
+import { formatDate } from '@/utils/dateUtils';
+import { FilterOptions } from '@/types';
 
 interface FilterBarProps {
-  filterOptions: FilterOptions;
-  setFilterOptions: React.Dispatch<React.SetStateAction<FilterOptions>>;
-  sortField: SortField;
-  setSortField: React.Dispatch<React.SetStateAction<SortField>>;
-  sortDirection: SortDirection;
-  setSortDirection: React.Dispatch<React.SetStateAction<SortDirection>>;
-  periodGrouping?: PeriodGrouping;
-  setPeriodGrouping?: React.Dispatch<React.SetStateAction<PeriodGrouping>>;
-  availableTags: string[];
-  availableMemberships: string[];
-  availableLocations: string[];
-  showPeriodSelector?: boolean;
+  membershipOptions: string[];
+  locationOptions: string[];
+  tagOptions: string[];
+  assigneeOptions: string[];
+  onFilterChange: (filters: FilterOptions) => void;
 }
 
 const FilterBar: React.FC<FilterBarProps> = ({
-  filterOptions,
-  setFilterOptions,
-  sortField,
-  setSortField,
-  sortDirection,
-  setSortDirection,
-  periodGrouping,
-  setPeriodGrouping,
-  availableTags,
-  availableMemberships,
-  availableLocations,
-  showPeriodSelector = false
+  membershipOptions,
+  locationOptions,
+  tagOptions,
+  assigneeOptions,
+  onFilterChange,
 }) => {
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [dateRange, setDateRange] = useState<{ 
-    from?: Date | undefined; 
-    to?: Date | undefined; 
-  }>({});
+  const [filters, setFilters] = useState<FilterOptions>({});
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState('');
+
+  const handleFilterChange = (key: keyof FilterOptions, value: any) => {
+    const newFilters = { ...filters, [key]: value };
+    if (!value || (Array.isArray(value) && value.length === 0)) {
+      delete newFilters[key];
+    }
+    setFilters(newFilters);
+    onFilterChange(newFilters);
+  };
+
+  const clearFilters = () => {
+    setFilters({});
+    setSearch('');
+    onFilterChange({});
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilterOptions(prev => ({ ...prev, search: e.target.value }));
+    const searchValue = e.target.value;
+    setSearch(searchValue);
+    handleFilterChange('search', searchValue);
   };
 
-  const handleTagFilter = (tag: string) => {
-    setFilterOptions(prev => {
-      const currentTags = prev.tags || [];
-      // Toggle tag selection
-      if (currentTags.includes(tag)) {
-        return { ...prev, tags: currentTags.filter(t => t !== tag) };
-      } else {
-        return { ...prev, tags: [...currentTags, tag] };
-      }
-    });
-  };
-
-  const handleDateRangeChange = () => {
-    setFilterOptions(prev => ({
-      ...prev,
-      expiresBefore: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined,
-      expiresAfter: dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : undefined,
-    }));
-  };
-
-  const handleAssigneeChange = (value: string) => {
-    setFilterOptions(prev => ({ ...prev, assignedTo: value === 'all' ? undefined : value }));
-  };
-
-  const handleResetFilters = () => {
-    setFilterOptions({});
-    setSortField('expiresAt');
-    setSortDirection('asc');
-    setDateRange({});
-    if (setPeriodGrouping) setPeriodGrouping('month');
-  };
+  const activeFilterCount = Object.keys(filters).filter(
+    (key) => key !== 'search'
+  ).length;
 
   return (
-    <div className="flex flex-col space-y-4 bg-white p-4 rounded-lg shadow-sm border border-border animate-fade-in">
-      <div className="flex flex-wrap gap-2">
-        {/* Search input */}
-        <div className="relative w-full md:w-64">
-          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <div className="mb-6 space-y-4">
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by name or email..."
-            value={filterOptions.search || ''}
+            placeholder="Search records..."
+            className="pl-10"
+            value={search}
             onChange={handleSearchChange}
-            className="pl-9"
           />
         </div>
-
-        {/* Sort selector */}
-        <Select
-          value={sortField}
-          onValueChange={(value) => setSortField(value as SortField)}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="customerName">Name</SelectItem>
-            <SelectItem value="expiresAt">Expiry Date</SelectItem>
-            <SelectItem value="membershipName">Membership</SelectItem>
-            <SelectItem value="homeLocation">Location</SelectItem>
-            <SelectItem value="daysLapsed">Days Lapsed</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Sort direction */}
-        <Select
-          value={sortDirection}
-          onValueChange={(value) => setSortDirection(value as SortDirection)}
-        >
-          <SelectTrigger className="w-[120px]">
-            <SelectValue placeholder="Direction" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="asc">Ascending</SelectItem>
-            <SelectItem value="desc">Descending</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Period grouping selector (only shown when needed) */}
-        {showPeriodSelector && setPeriodGrouping && (
-          <Select
-            value={periodGrouping}
-            onValueChange={(value) => setPeriodGrouping(value as PeriodGrouping)}
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setIsOpen(!isOpen)}
+            className="whitespace-nowrap"
           >
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Group by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="week">Weekly</SelectItem>
-              <SelectItem value="month">Monthly</SelectItem>
-              <SelectItem value="quarter">Quarterly</SelectItem>
-              <SelectItem value="year">Yearly</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
-
-        {/* Date range picker */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="flex gap-2">
-              <CalendarIcon className="h-4 w-4" />
-              {filterOptions.expiresAfter || filterOptions.expiresBefore 
-                ? `${filterOptions.expiresAfter || 'Any'} - ${filterOptions.expiresBefore || 'Any'}` 
-                : "Date Range"}
+            <Filter className="h-4 w-4 mr-2" />
+            Filters
+            {activeFilterCount > 0 && (
+              <Badge className="ml-2" variant="secondary">
+                {activeFilterCount}
+              </Badge>
+            )}
+          </Button>
+          {activeFilterCount > 0 && (
+            <Button variant="ghost" size="icon" onClick={clearFilters}>
+              <X className="h-4 w-4" />
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="range"
-              selected={dateRange}
-              onSelect={(range) => {
-                setDateRange(range || {});
-              }}
-              initialFocus
-              footer={
-                <div className="flex justify-end p-2">
-                  <Button variant="outline" size="sm" onClick={handleDateRangeChange}>Apply</Button>
-                </div>
-              }
-            />
-          </PopoverContent>
-        </Popover>
+          )}
+        </div>
+      </div>
 
-        {/* Assignee dropdown */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="flex gap-2">
-              <Filter className="h-4 w-4" />
-              {filterOptions.assignedTo || "Assignee"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[200px]">
-            <div className="space-y-2">
-              <div className="font-medium">Select Assignee</div>
-              <Select onValueChange={handleAssigneeChange} value={filterOptions.assignedTo || 'all'}>
+      {isOpen && (
+        <div className="bg-background border rounded-lg p-4 space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+          <h3 className="text-lg font-medium">Filter Memberships</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Membership Type Filter */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Membership Type
+              </label>
+              <Select
+                onValueChange={(value) => 
+                  handleFilterChange('membershipName', value ? [value] : [])
+                }
+                value={filters.membershipName?.[0] || ""}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select assignee" />
+                  <SelectValue placeholder="Any membership" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Associates</SelectItem>
-                  <SelectItem value="Admin Admin">Admin Admin</SelectItem>
-                  <SelectItem value="Akshay Rane">Akshay Rane</SelectItem>
-                  <SelectItem value="Api Serou">Api Serou</SelectItem>
-                  <SelectItem value="Imran Shaikh">Imran Shaikh</SelectItem>
-                  <SelectItem value="Jayanta Banerjee">Jayanta Banerjee</SelectItem>
-                  <SelectItem value="Manisha Rathod">Manisha Rathod</SelectItem>
-                  <SelectItem value="Prathap Kp">Prathap Kp</SelectItem>
-                  <SelectItem value="Priyanka Abnave">Priyanka Abnave</SelectItem>
-                  <SelectItem value="Santhosh Kumar">Santhosh Kumar</SelectItem>
-                  <SelectItem value="Sheetal Kataria">Sheetal Kataria</SelectItem>
-                  <SelectItem value="Shipra Bhika">Shipra Bhika</SelectItem>
-                  <SelectItem value="Tahira Sayyed">Tahira Sayyed</SelectItem>
-                  <SelectItem value="Zahur Shaikh">Zahur Shaikh</SelectItem>
+                  <SelectItem value="">Any membership</SelectItem>
+                  {membershipOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-          </PopoverContent>
-        </Popover>
 
-        {/* More filters - Memberships and Locations */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="flex gap-2">
-              <SlidersHorizontal className="h-4 w-4" />
-              More Filters
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[300px] max-h-[400px] overflow-y-auto">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="font-medium">Memberships</div>
-                <div className="space-y-1">
-                  {availableMemberships.map(membership => (
-                    <div className="flex items-center space-x-2" key={membership}>
-                      <Checkbox 
-                        id={`membership-${membership}`}
-                        checked={(filterOptions.membershipName || []).includes(membership)}
-                        onCheckedChange={() => {
-                          setFilterOptions(prev => {
-                            const currentMemberships = prev.membershipName || [];
-                            if (currentMemberships.includes(membership)) {
-                              return { 
-                                ...prev, 
-                                membershipName: currentMemberships.filter(m => m !== membership) 
-                              };
-                            } else {
-                              return { 
-                                ...prev, 
-                                membershipName: [...currentMemberships, membership] 
-                              };
-                            }
-                          });
-                        }}
-                      />
-                      <label 
-                        htmlFor={`membership-${membership}`}
-                        className="text-sm cursor-pointer"
-                      >
-                        {membership}
-                      </label>
-                    </div>
+            {/* Home Location Filter */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Home Location
+              </label>
+              <Select
+                onValueChange={(value) => 
+                  handleFilterChange('homeLocation', value ? [value] : [])
+                }
+                value={filters.homeLocation?.[0] || ""}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Any location" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Any location</SelectItem>
+                  {locationOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
                   ))}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="font-medium">Locations</div>
-                <div className="space-y-1">
-                  {availableLocations.map(location => (
-                    <div className="flex items-center space-x-2" key={location}>
-                      <Checkbox 
-                        id={`location-${location}`}
-                        checked={(filterOptions.homeLocation || []).includes(location)}
-                        onCheckedChange={() => {
-                          setFilterOptions(prev => {
-                            const currentLocations = prev.homeLocation || [];
-                            if (currentLocations.includes(location)) {
-                              return { 
-                                ...prev, 
-                                homeLocation: currentLocations.filter(l => l !== location) 
-                              };
-                            } else {
-                              return { 
-                                ...prev, 
-                                homeLocation: [...currentLocations, location] 
-                              };
-                            }
-                          });
-                        }}
-                      />
-                      <label 
-                        htmlFor={`location-${location}`}
-                        className="text-sm cursor-pointer"
-                      >
-                        {location}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                </SelectContent>
+              </Select>
             </div>
-          </PopoverContent>
-        </Popover>
 
-        {/* Reset button */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={handleResetFilters}
-          className="text-muted-foreground"
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
+            {/* Tags Filter */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Tags
+              </label>
+              <Select
+                onValueChange={(value) => 
+                  handleFilterChange('tags', value ? [value] : [])
+                }
+                value={filters.tags?.[0] || ""}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Any tag" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Any tag</SelectItem>
+                  {tagOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-      {/* Tags section */}
-      <div className="flex flex-wrap gap-2">
-        {availableTags.map(tag => (
-          <Badge 
-            key={tag}
-            variant={(filterOptions.tags || []).includes(tag) ? "default" : "outline"}
-            className={`cursor-pointer hover:bg-primary/90 transition-colors ${
-              (filterOptions.tags || []).includes(tag) ? '' : 'hover:text-primary-foreground'
-            }`}
-            onClick={() => handleTagFilter(tag)}
-          >
-            {tag}
-          </Badge>
-        ))}
-      </div>
+            {/* Assignee Filter */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Assigned To
+              </label>
+              <Select
+                onValueChange={(value) => 
+                  handleFilterChange('assignedTo', value || undefined)
+                }
+                value={filters.assignedTo || ""}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Any assignee" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Any assignee</SelectItem>
+                  {assigneeOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Expires Before Filter */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Expires Before
+              </label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal h-10"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {filters.expiresBefore
+                      ? formatDate(filters.expiresBefore)
+                      : "Select Date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={filters.expiresBefore ? new Date(filters.expiresBefore) : undefined}
+                    onSelect={(date) =>
+                      handleFilterChange(
+                        'expiresBefore',
+                        date ? date.toISOString() : undefined
+                      )
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Expires After Filter */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Expires After
+              </label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal h-10"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {filters.expiresAfter
+                      ? formatDate(filters.expiresAfter)
+                      : "Select Date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={filters.expiresAfter ? new Date(filters.expiresAfter) : undefined}
+                    onSelect={(date) =>
+                      handleFilterChange(
+                        'expiresAfter',
+                        date ? date.toISOString() : undefined
+                      )
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+          
+          <div className="flex justify-between pt-4 border-t">
+            <Button variant="ghost" onClick={clearFilters}>
+              Reset Filters
+            </Button>
+            <Button onClick={() => setIsOpen(false)}>Apply Filters</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
