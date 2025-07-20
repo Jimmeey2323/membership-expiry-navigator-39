@@ -144,14 +144,38 @@ const Index = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center space-y-6 animate-fade-in">
-          <Card className="p-8 max-w-sm mx-auto bg-white shadow-2xl border-2 border-slate-200">
-            <RefreshCw className="h-12 w-12 text-blue-600 animate-spin mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-slate-900 mb-2">
-              Loading Dashboard
-            </h2>
-            <p className="text-slate-600">Fetching membership data...</p>
+      <div className="min-h-screen gradient-mesh flex items-center justify-center">
+        <div className="text-center space-y-8 animate-fade-in">
+          <Card className="card-glass p-12 max-w-md mx-auto">
+            <div className="relative mb-8">
+              <div className="absolute inset-0 gradient-primary rounded-full blur-lg opacity-50 animate-glow" />
+              <div className="relative p-6 gradient-primary text-white rounded-full mx-auto w-fit">
+                <RefreshCw className="h-12 w-12 animate-spin" />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h2 className="text-sophisticated text-2xl">
+                Loading Dashboard
+              </h2>
+              <p className="text-refined text-lg">
+                Fetching membership data & analytics...
+              </p>
+              
+              {/* Loading shimmer bars */}
+              <div className="space-y-3 mt-8">
+                {[1, 2, 3].map((i) => (
+                  <div 
+                    key={i}
+                    className="h-2 bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20 rounded-full animate-shimmer"
+                    style={{ 
+                      animationDelay: `${i * 200}ms`,
+                      backgroundSize: '200px 100%',
+                      backgroundRepeat: 'no-repeat'
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
           </Card>
         </div>
       </div>
@@ -159,51 +183,60 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="container mx-auto px-6 py-8 space-y-8">
-        {/* Professional Header */}
-        <div className="flex items-center justify-between animate-fade-in">
-          <div className="space-y-1">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl shadow-lg">
-                <Building2 className="h-7 w-7" />
+    <div className="min-h-screen gradient-mesh">
+      <div className="container-constrained section-spacing space-y-12">
+        {/* Sophisticated Header */}
+        <div className="relative animate-fade-in">
+          <div className="absolute inset-0 gradient-sophisticated opacity-5 rounded-3xl blur-3xl" />
+          <div className="relative card-glass p-8 rounded-3xl border-2">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 gradient-primary rounded-2xl blur-lg opacity-50 animate-glow" />
+                    <div className="relative p-4 gradient-primary text-white rounded-2xl shadow-2xl">
+                      <Building2 className="h-8 w-8" />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <h1 className="text-elegant-heading">
+                      Membership Analytics
+                    </h1>
+                    <p className="text-refined text-xl">
+                      Advanced membership management & insights platform
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <h1 className="text-4xl font-bold text-slate-900">
-                  Membership Analytics
-                </h1>
-                <p className="text-slate-600 font-medium text-lg">
-                  Professional membership management dashboard
-                </p>
+              
+              <div className="flex items-center gap-3">
+                <ThemeToggle />
+                <Link to="/churn-analytics">
+                  <Button 
+                    variant="outline" 
+                    className="card-elevated border-destructive/20 hover:bg-destructive/5 text-destructive shadow-md hover:shadow-lg"
+                  >
+                    <TrendingDown className="h-4 w-4 mr-2" />
+                    Churn Analytics
+                  </Button>
+                </Link>
+                <Button 
+                  onClick={handleRefresh} 
+                  variant="outline" 
+                  className="card-elevated hover:bg-accent/50 shadow-md hover:shadow-lg"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh
+                </Button>
+                <Button 
+                  onClick={() => setIsFilterOpen(true)} 
+                  className="gradient-primary shadow-lg hover:shadow-xl animate-glow"
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  Advanced Filters
+                </Button>
               </div>
             </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <Link to="/churn-analytics">
-              <Button 
-                variant="outline" 
-                className="border-red-300 hover:bg-red-50 text-red-700 shadow-sm"
-              >
-                <TrendingDown className="h-4 w-4 mr-2" />
-                Churn Analytics
-              </Button>
-            </Link>
-            <Button 
-              onClick={handleRefresh} 
-              variant="outline" 
-              className="border-slate-300 hover:bg-white shadow-sm"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
-            <Button 
-              onClick={() => setIsFilterOpen(true)} 
-              className="bg-blue-600 hover:bg-blue-700 shadow-lg"
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Advanced Filters
-            </Button>
           </div>
         </div>
 
@@ -217,8 +250,9 @@ const Index = () => {
           />
         </div>
 
-        {/* Enhanced Metrics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-slide-up">
+        {/* Sophisticated Metrics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 animate-slide-up">
+          <div className="absolute inset-0 gradient-mesh opacity-20 rounded-3xl blur-3xl pointer-events-none" />
           <MetricCard
             title="Total Members"
             value={localMembershipData.length}
@@ -282,41 +316,44 @@ const Index = () => {
           <MembershipChart data={filteredData} />
         </div>
 
-        {/* Enhanced Data Tables */}
+        {/* Elegant Interactive Data Tables */}
         <div className="animate-slide-up">
-          <Tabs defaultValue="overview" className="space-y-6">
-            <Card className="p-2 bg-white border-2 border-slate-100 shadow-sm">
-              <TabsList className="grid w-full grid-cols-4 bg-slate-50 gap-1 p-1">
-                <TabsTrigger 
-                  value="overview" 
-                  className="data-[state=active]:bg-blue-600 data-[state=active]:text-white font-semibold transition-all duration-200"
-                >
-                  <Activity className="h-4 w-4 mr-2" />
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="active" 
-                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white font-semibold transition-all duration-200"
-                >
-                  <UserCheck className="h-4 w-4 mr-2" />
-                  Active ({activeMembers.length})
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="expired" 
-                  className="data-[state=active]:bg-red-600 data-[state=active]:text-white font-semibold transition-all duration-200"
-                >
-                  <UserX className="h-4 w-4 mr-2" />
-                  Expired ({expiredMembers.length})
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="sessions" 
-                  className="data-[state=active]:bg-purple-600 data-[state=active]:text-white font-semibold transition-all duration-200"
-                >
-                  <Dumbbell className="h-4 w-4 mr-2" />
-                  Sessions
-                </TabsTrigger>
-              </TabsList>
-            </Card>
+          <Tabs defaultValue="overview" className="space-y-8">
+            <div className="relative">
+              <div className="absolute inset-0 gradient-mesh opacity-10 rounded-2xl blur-2xl" />
+              <Card className="card-glass p-3 relative">
+                <TabsList className="grid w-full grid-cols-4 bg-background/50 gap-2 p-2 backdrop-blur-sm">
+                  <TabsTrigger 
+                    value="overview" 
+                    className="data-[state=active]:gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg font-semibold transition-all duration-300 data-[state=active]:scale-105 hover:bg-accent/50"
+                  >
+                    <Activity className="h-4 w-4 mr-2" />
+                    Overview
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="active" 
+                    className="data-[state=active]:bg-success data-[state=active]:text-success-foreground data-[state=active]:shadow-lg font-semibold transition-all duration-300 data-[state=active]:scale-105 hover:bg-accent/50"
+                  >
+                    <UserCheck className="h-4 w-4 mr-2" />
+                    Active ({activeMembers.length})
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="expired" 
+                    className="data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground data-[state=active]:shadow-lg font-semibold transition-all duration-300 data-[state=active]:scale-105 hover:bg-accent/50"
+                  >
+                    <UserX className="h-4 w-4 mr-2" />
+                    Expired ({expiredMembers.length})
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="sessions" 
+                    className="data-[state=active]:bg-warning data-[state=active]:text-warning-foreground data-[state=active]:shadow-lg font-semibold transition-all duration-300 data-[state=active]:scale-105 hover:bg-accent/50"
+                  >
+                    <Dumbbell className="h-4 w-4 mr-2" />
+                    Sessions
+                  </TabsTrigger>
+                </TabsList>
+              </Card>
+            </div>
 
             <TabsContent value="overview" className="space-y-6">
               <DataTable 

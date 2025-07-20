@@ -246,21 +246,21 @@ export const DataTable = ({
                                     <Calendar className="h-4 w-4" />
                                     Order Details
                                   </h4>
-                                  <p className="text-sm text-slate-600">Order Date: {new Date(member.orderDate).toLocaleDateString()}</p>
-                                  <p className="text-sm text-slate-600">Start Date: {new Date(member.startDate).toLocaleDateString()}</p>
+                                   <p className="text-sm text-slate-600">Order Date: {new Date(member.orderDate).toLocaleDateString()}</p>
+                                   <p className="text-sm text-slate-600">End Date: {new Date(member.endDate).toLocaleDateString()}</p>
                                 </div>
                                 <div className="space-y-2">
                                   <h4 className="font-semibold text-slate-700 flex items-center gap-2">
                                     <TrendingUp className="h-4 w-4" />
                                     Activity
                                   </h4>
-                                  <p className="text-sm text-slate-600">Sessions Used: {(member.totalSessions || 0) - member.sessionsLeft}</p>
-                                  <p className="text-sm text-slate-600">Total Sessions: {member.totalSessions || 'N/A'}</p>
+                                   <p className="text-sm text-slate-600">Sessions Remaining: {member.sessionsLeft}</p>
+                                   <p className="text-sm text-slate-600">Frozen Status: {member.frozen || 'No'}</p>
                                 </div>
                                 <div className="space-y-2">
                                   <h4 className="font-semibold text-slate-700">Contact</h4>
-                                  <p className="text-sm text-slate-600">Phone: {member.phone || 'N/A'}</p>
-                                  <p className="text-sm text-slate-600">Address: {member.address || 'N/A'}</p>
+                                   <p className="text-sm text-slate-600">Email: {member.email}</p>
+                                   <p className="text-sm text-slate-600">Member ID: {member.memberId}</p>
                                 </div>
                                 <div className="space-y-2">
                                   <h4 className="font-semibold text-slate-700">Notes</h4>
