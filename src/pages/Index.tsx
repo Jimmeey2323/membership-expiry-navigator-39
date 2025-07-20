@@ -93,6 +93,9 @@ const Index = () => {
   };
 
   const applyQuickFilter = (data: MembershipData[]): MembershipData[] => {
+    // If quickFilter is 'all', don't apply any additional filtering
+    if (quickFilter === 'all') return data;
+    
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -400,7 +403,11 @@ const Index = () => {
           isOpen={isFilterOpen}
           onClose={() => setIsFilterOpen(false)}
           filters={filters}
-          onFiltersChange={setFilters}
+          onFiltersChange={(newFilters) => {
+            setFilters(newFilters);
+            // Reset quick filter when advanced filters are applied
+            setQuickFilter('all');
+          }}
           availableLocations={availableLocations}
           availableMembershipTypes={availableMembershipTypes}
         />
